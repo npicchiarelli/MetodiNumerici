@@ -51,7 +51,8 @@ function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int)
     return acc
 end
 
-function heathbath!(lattice::Array{Int})
+function heathbath!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int)
+    
     
 end
 
