@@ -1,11 +1,12 @@
 M = [[1 2 3]; [4 5 6]; [7 8 9]]
 ci = CartesianIndices(M)
-I1 = oneunit(ci[1])
+# I1 = oneunit(ci[1])
 for i in ci 
-    @show i_v = vcat(getindex(i,1) ,getindex(i,2))
+    @show i
+    # @show i_v = vcat(getindex(i,1) ,getindex(i,2))
 end
-
-# lrud = [CartesianIndex(0,1) CartesianIndex(0,-1) CartesianIndex(1,0) CartesianIndex(-1,0)]
+M[1,1]
+# sum(M)# lrud = [CartesianIndex(0,1) CartesianIndex(0,-1) CartesianIndex(1,0) CartesianIndex(-1,0)]
 
 # i = CartesianIndex(1,1)
 # j = CartesianIndex(2,3)
