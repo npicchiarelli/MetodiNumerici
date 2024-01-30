@@ -1,6 +1,6 @@
 using Combinatorics, LinearAlgebra, Random
 
-Random.seed!(666)
+
 function init_lattice(L::Int ,q = 4)
     lattice = rand(0:q-1, (L,L))
     return lattice
@@ -13,7 +13,7 @@ function getneighbors(idx::CartesianIndex, L::Int)
     return CartesianIndex.(nn_v[:,1], nn_v[:,2])
 end
 
-function energy(lattice::Array{Int}, q::Int)
+function energy(lattice::Array{Int}, q::Int, L::Int)
     e_persite = zeros(Float64, size(lattice))
     L = size(lattice, 1)
     for i in CartesianIndices(lattice)
@@ -21,7 +21,7 @@ function energy(lattice::Array{Int}, q::Int)
         e_persite[i] = -sum(cos, (2pi/q).*(lattice[i] .- lattice[nn]))
     end
     e_tot = sum(e_persite)
-    return e_tot
+    return e_tot/L^2
 end
 
 function energy_local(S::Int, lattice::Array{Int}, rx::Int, ry::Int, q::Int)
@@ -32,16 +32,23 @@ function energy_local(S::Int, lattice::Array{Int}, rx::Int, ry::Int, q::Int)
 end
 
 function init_prob_dict(q::Int, β::Float64)
+    a = 0:q-1
     comb_arr = collect(with_replacement_combinations(a,4))
     e_v = Vector{Vector{Float64}}(undef, 35)
     prob_v = Vector{Vector{Float64}}(undef, 35)
+    norm_prob = Vector{Vector{Float64}}(undef, 35)
+
     for (idx, i) in enumerate(comb_arr)
         e_v[idx] = round.([-sum(cos, (2pi/q).*(j .- i)) for j in a])
-        prob_v[idx] = exp.(-e_v[idx])./sum(exp.(-e_v[idx]))
+        prob_v[idx] = exp.(-β* e_v[idx])./sum(exp.(-β.*e_v[idx]))
         # @show i, e_v[idx]
     end
+    
+    for i in 1:length(prob_v)
+        norm_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])
+    end
 
-    return Dict(zip(comb_arr, prob_v))
+    return Dict(zip(comb_arr, norm_prob))
 end
 
 function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int)
@@ -62,49 +69,20 @@ function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int)
     return acc
 end
 
-function heathbath!(lattice::Array{Int}, idx::CartesianIndex, q::Int, pdict::Dict, L)
+function heathbath!(lattice::Array{Int}, idx::CartesianIndex, pdict::Dict, L)
+    acc = 0
     nn_idx = getneighbors(idx, L)
     nn = lattice[nn_idx]
     prob = pdict[sort(nn)]
 
-    rnumber = rand(Float64)
+    rnumber = rand()
+    rnumber
     for (i,p) in enumerate(prob)
         if rnumber<p
             lattice[idx] = i-1
+            acc+=1
             break
+        end
     end 
-    return 1
+    return acc
 end
-
-function findedict(lattice::Array{Int}, rx::Int, ry::Int, edict::Dict)
-    L = size(lattice, 1)
-    lrud = [[0 1]; [0 -1]; [1 0]; [-1 0]] 
-    i_v = [rx ry]
-    nn_v = i_v .+ lrud
-    replace!(nn_v, 0=>L, L+1=>1)
-    nn = CartesianIndex.(nn_v[:,1], nn_v[:,2])
-
-    neighbors = sort(lattice[nn])
-    return edict[neighbors]
-end
-
-Q = 4
-L = 3
-Δ = 4
-
-@show lattice = init_lattice(L)
-energy_dict = init_energy_dict(Q, 1.)
-
-
-# findedict(lattice, 2, 2, energy_dict)
-
-
-
-#=
-@show energy(lattice, 4)
-rx = rand(1:3)
-ry = rand(1:3)
-println(rx,ry)
-@show metropolis!(lattice, rx, ry, Δ, 4)
-@show lattice
-@show energy(lattice, 4)=#
