@@ -5,6 +5,11 @@ function init_lattice(L::Int ,q = 4)
     lattice = rand(0:q-1, (L,L))
     return lattice
 end
+
+function complex_vars(lattice::Array{Int}, q::Int = 4)
+    return exp.(im.*2π.*lattice./q)
+end
+
 function getneighbors(idx::CartesianIndex, L::Int)
     lrud = [[0 1]; [0 -1]; [1 0]; [-1 0]] 
     i_v = hcat(getindex(idx,1), getindex(idx,2))
@@ -22,6 +27,12 @@ function energy(lattice::Array{Int}, q::Int, L::Int)
     end
     e_tot = sum(e_persite)
     return e_tot/L^2
+end
+
+function magnetization(lattice::Array{Int}, q::Int, L::Int)
+    comp_lat = complex_vars(lattice, q)
+    m = sum(comp_lat)/L^2
+    return m
 end
 
 function energy_local(S::Int, lattice::Array{Int}, rx::Int, ry::Int, q::Int)
@@ -51,22 +62,21 @@ function init_prob_dict(q::Int, β::Float64)
     return Dict(zip(comb_arr, norm_prob))
 end
 
-function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int)
-    acc = 0
-    @show ΔS = Int(floor(rand(Float64)*Δ))
-    S_test = mod((lattice[rx,ry] + ΔS), q)
+function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int, β::Float64)
+    ΔS = Int(floor(rand(Float64)*Δ))
+    S_test = (lattice[rx,ry] + ΔS)%q
     
-    ΔE = energy_local(lattice[rx,ry], lattice, rx, ry,q) - energy_local(S_test, lattice, rx, ry,q) 
+    ΔE = energy_local(S_test, lattice, rx, ry,q) - energy_local(lattice[rx,ry], lattice, rx, ry,q) 
 
     if ΔE < 0
         lattice[rx,ry] = S_test
-        acc+=1
-    elseif rand(Float64) < exp(ΔE)
+        return 1
+    elseif rand(Float64) < exp(-β*ΔE)
         lattice[rx,ry] = S_test
-        acc+=1
+        return 1
     end
 
-    return acc
+    return 0
 end
 
 function heathbath!(lattice::Array{Int}, idx::CartesianIndex, pdict::Dict, L)
