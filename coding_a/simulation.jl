@@ -3,12 +3,12 @@ include("clock.jl")
 
 L= 4
 Q = 4
-expo = 5
-Nt = Int(10^expo)
-β = 1.
+expo = 7
+Nt = 5*Int(10^expo)
+β = 0.4
 Δ = 1
 
-metropolis = true
+metropolis = false
 
 @show Nupdates = Nt*L*L
 pdict = init_prob_dict(Q,β)
@@ -20,7 +20,8 @@ lattice = zeros(Int, (L,L))
 path = "..\\simulations_a\\" 
 datestamp=Dates.format(now(),"YYYYmmdd-HHMMSS")
 
-f1 = path*"clock_metro_"*"L=$L"*"Nt=1e$expo"*"_$datestamp"*".csv"
+f1 = path*"clock_"*"Nt=1e$expo"*"L=$L"*"beta=$β"*".csv"
+# f1 = path*"clock_"*"L=$L"*"Nt=1e$expo"*"_$datestamp"*".csv"
 
 touch(f1)
 acc = 0
@@ -36,11 +37,11 @@ for nt in 1:Nt
             global acc += heathbath!(lattice, idx, pdict, L)
         end
     end
-    if nt%1000 == 0
+    if nt%100000 == 0
         elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
         acc_p = acc/(nt*L*L)*100
         # per_step = Dates.canonicalize(now()-start_step)
-        println("Step $nt, acceptance = $acc_p %, teotal elapsed time $(elapsed)")#, time per step $per_step")
+        println("Step $nt, acceptance = $acc_p %, total elapsed time $(elapsed)")#, time per step $per_step")
     end
 
 E[nt] = energy(lattice, Q, L)
