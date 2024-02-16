@@ -60,23 +60,6 @@ for β in betarray
 
     # elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
     # println("Computation took: $(elapsed)")
-    # data = DataFrame(
-    #     beta = β,
-    #     m = mean(magn),
-    #     e = means[1],
-    #     e_v = stds[1],
-    #     m_abs = means[2],
-    #     m_abs_v = stds[2],
-    #     m_abs2 = means[3],
-    #     m_abs2_v = stds[3],
-    #     spec_heat = means[4],
-    #     spec_heat_v = stds[4],
-    #     susc = means[5],
-    #     susc_v = stds[5],
-    #     bind = means[6],
-    #     bind_v = stds[6],
-    # )
-
     push!(tosave, data)
 end
 
