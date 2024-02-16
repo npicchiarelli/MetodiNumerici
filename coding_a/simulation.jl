@@ -3,7 +3,7 @@ include("clock.jl")
 
 L= 4
 Q = 4
-expo = 7
+expo = 4
 Nt = 1*Int(10^expo)
 #β = 0.42
 Δ = 1
@@ -11,7 +11,7 @@ Nt = 1*Int(10^expo)
 metropolis = false
 
 @show Nupdates = Nt*L*L
-for β in []
+for β in [0.42]
     pdict = init_prob_dict(Q,β)
     E = Vector{Float64}(undef, Nt)
     m = Vector{ComplexF64}(undef, Nt)
@@ -33,9 +33,9 @@ for β in []
             if metropolis
                 rx = idx[1]
                 ry = idx[2]
-                global acc += metropolis!(lattice,rx,ry,Δ,L,β) 
+                acc += metropolis!(lattice,rx,ry,Δ,L,β) 
             else
-                global acc += heathbath!(lattice, idx, pdict, L)
+                acc += heathbath!(lattice, idx, pdict, L)
             end
         end
         if nt%100000 == 0
