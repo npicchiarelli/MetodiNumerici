@@ -1,4 +1,4 @@
-using CSV, DataFrames,Plots, Statistics
+using CSV, DataFrames, Dates, Plots, Statistics
 
 function blocking(x::Array, blocksize::Int)
     length = size(x,1) ÷ blocksize 
@@ -11,22 +11,26 @@ end
 
 function JackKnife(e::Array, m::Array, blocksize::Int)
     length = size(e,1) ÷ blocksize 
-    m_abs = Vector{Float64}(undef, length)
-    m_abs2 = Vector{Float64}(undef, length)
-    m_abs4 = Vector{Float64}(undef, length)
-    e2 = Vector{Float64}(undef, length)
+    m_j = Vector{Float64}(undef, length) 
+    e_j = Vector{Float64}(undef, length) 
+    m_abs_j = Vector{Float64}(undef, length)
+    m_abs2_j = Vector{Float64}(undef, length)
+    m_abs4_j = Vector{Float64}(undef, length)
+    e2_j = Vector{Float64}(undef, length)
 
     e_cut = e[1:length*blocksize]
     m_cut = m[1:length*blocksize]
 
-    e_b = reshape(e_cut, (blocksize, length))
-    m_b = reshape(m_cut, (blocksize, length))
+    e_b = mean(reshape(e_cut, (blocksize, length)), dims = 1)
+    m_b = mean(reshape(m_cut, (blocksize, length)), dims = 1)
 
-    e_j = [mean([e[1:i*blocksize]; e[(i+1)*blocksize:end]]) for i = 0:length-1]
-    e2_j = [mean(abs2, [e[1:i*blocksize]; e[(i+1)*blocksize:end]]) for i = 0:length-1]
-    m_abs_j = [mean(abs, [m[1:i*blocksize]; m[(i+1)*blocksize:end]]) for i = 0:length-1]
-    m_abs2_j = [mean(abs2, [m[1:i*blocksize]; m[(i+1)*blocksize:end]]) for i = 0:length-1]
-    m_abs4_j = [mean((abs.([m[1:i*blocksize]; m[(i+1)*blocksize:end]])).^4) for i = 0:length-1]
+    for i = 0:length-1
+        e_j[i+1] = mean([e_b[1:i]; e_b[(i+1):end]])
+        e2_j[i+1] = mean(abs2, [e_b[1:i]; e_b[(i+1):end]])
+        m_abs_j[i+1] = mean(abs, [m_b[1:i]; m_b[(i+1):end]])
+        m_abs2_j[i+1] = mean(abs2, [m_b[1:i]; m_b[(i+1):end]])
+        m_abs4_j[i+1] = mean((abs.([m_b[1:i]; m_b[(i+1):end]])).^4)
+    end
 
     spec_heat = e2_j.-e_j.^2 
     susc = m_abs2_j.-m_abs_j.^2
@@ -37,18 +41,51 @@ function JackKnife(e::Array, m::Array, blocksize::Int)
     return media, stdm(vars, media, dims = 1)*sqrt(length)
 end
 
-
-
-
-path = "..\\simulations_a\\" 
-f1 = path*"clock_L=4Nt=1e5_20240201-111634.csv"
 L = 4
-df= CSV.read(f1, DataFrame, types = [Float64, ComplexF64])
-# @show df
+path = "..\\simulations_a\\" 
+f_w =  path*"data"*"L=$L"*".csv"
+touch(f_w)
 
-e = df[!,:E]
-m = df[!,:m]
+tosave = DataFrame([[],[],[],[],[],[],[],[],[],[],[],[],[],[]], ["beta", "m", "e","e_v","m_abs","m_abs_v","m_abs2","m_abs2_v","spec_heat","spec_heat_v","susc","susc_v","bind","bind_v"])
 
-@show mean(m)
+for β in [0.42]
+    # start = now()
+    f1 = path*"clock_Nt=1e4"*"L=$L"*"beta=$β.csv"
+    df= CSV.read(f1, DataFrame, types = [Float64, ComplexF64])
+    # @show df
+    # elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+    # println("Opening took: $(elapsed)")
 
-JackKnife(e,m,100)
+    energ = df[!,:E]
+    magn = df[!,:m]
+
+    # start = now()
+
+    means, stds = JackKnife(energ,magn,1000)
+
+    inter = ([means stds]'[:])'
+    data = [β abs(mean(magn)) inter]
+
+    # elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+    # println("Computation took: $(elapsed)")
+    # data = DataFrame(
+    #     beta = β,
+    #     m = mean(magn),
+    #     e = means[1],
+    #     e_v = stds[1],
+    #     m_abs = means[2],
+    #     m_abs_v = stds[2],
+    #     m_abs2 = means[3],
+    #     m_abs2_v = stds[3],
+    #     spec_heat = means[4],
+    #     spec_heat_v = stds[4],
+    #     susc = means[5],
+    #     susc_v = stds[5],
+    #     bind = means[6],
+    #     bind_v = stds[6],
+    # )
+
+    push!(tosave, data)
+end
+
+CSV.write(f_w, tosave)
