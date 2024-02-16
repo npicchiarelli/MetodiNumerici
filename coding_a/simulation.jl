@@ -40,13 +40,12 @@ for β in betarray
                 acc += heathbath!(lattice, idx, pdict, L)
             end
         end
-        if nt%100000 == 0
-            elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-            acc_p = acc/(nt*L*L)*100
-            # per_step = Dates.canonicalize(now()-start_step)
-            println("Step $nt, acceptance = $acc_p %, total elapsed time $(elapsed)")#, time per step $per_step")
-        end
-
+        # if nt%100000 == 0
+        #     elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+        #     println("Step $nt, acceptance = $acc_p %, total elapsed time $(elapsed)")#, time per step $per_step")
+        # end
+    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+        println("β = $β,elapsed time $(elapsed)")#, time per step $per_step")
     E[nt] = energy(lattice, Q, L)
     m[nt] = magnetization(lattice, Q, L)
     end
