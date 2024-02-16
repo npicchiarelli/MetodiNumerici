@@ -1,14 +1,5 @@
 using CSV, DataFrames, Dates, Plots, Statistics
 
-function blocking(x::Array, blocksize::Int)
-    length = size(x,1) ÷ blocksize 
-    x_b = Vector{Float64}(undef, length)
-    x_cut = x[1:length*blocksize]
-    x_b = mean(reshape(x_cut, (blocksize, length)), dims = 1)
-    
-    return x_b
-end
-
 function JackKnife(e::Array, m::Array, blocksize::Int)
     length = size(e,1) ÷ blocksize 
     m_j = Vector{Float64}(undef, length) 
@@ -42,13 +33,14 @@ function JackKnife(e::Array, m::Array, blocksize::Int)
 end
 
 L = 4
+betarray = LinRange(0.4,0.47,10)
 path = "..\\simulations_a\\" 
 f_w =  path*"data"*"L=$L"*".csv"
 touch(f_w)
 
 tosave = DataFrame([[],[],[],[],[],[],[],[],[],[],[],[],[],[]], ["beta", "m", "e","e_v","m_abs","m_abs_v","m_abs2","m_abs2_v","spec_heat","spec_heat_v","susc","susc_v","bind","bind_v"])
 
-for β in [0.42]
+for β in betarray
     # start = now()
     f1 = path*"clock_Nt=1e4"*"L=$L"*"beta=$β.csv"
     df= CSV.read(f1, DataFrame, types = [Float64, ComplexF64])

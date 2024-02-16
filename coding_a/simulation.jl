@@ -11,7 +11,9 @@ Nt = 1*Int(10^expo)
 metropolis = false
 
 @show Nupdates = Nt*L*L
-for β in [0.42]
+
+betarray = LinRange(0.4,0.47,10)
+for β in betarray
     pdict = init_prob_dict(Q,β)
     E = Vector{Float64}(undef, Nt)
     m = Vector{ComplexF64}(undef, Nt)
