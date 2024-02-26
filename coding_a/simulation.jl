@@ -1,30 +1,28 @@
 using CSV, DataFrames, Dates
 include("clock.jl")
 
-L= 4
+L= 20
 Q = 4
-expo = 7
+expo = 5
 Nt = 1*Int(10^expo)
 #β = 0.42
 Δ = 1
-
+path = "..\\simulations_a\\"
 metropolis = false
 
 @show Nupdates = Nt*L*L
 
-betarray = LinRange(0.4,0.47,10)
-for β in betarray
+betarray = LinRange(0.85,0.91,21)
+start_all = now()
+for (i, β) in enumerate(betarray)
     pdict = init_prob_dict(Q,β)
     E = Vector{Float64}(undef, Nt)
     m = Vector{ComplexF64}(undef, Nt)
 
-    lattice = zeros(Int, (L,L))
-
-    path = "..\\simulations_a\\" 
-    datestamp=Dates.format(now(),"YYYYmmdd-HHMMSS")
+    lattice = zeros(Int, (L,L)) 
+    # datestamp=Dates.format(now(),"YYYYmmdd-HHMMSS")
 
     f1 = path*"clock_"*"Nt=1e$expo"*"L=$L"*"beta=$β"*".csv"
-    # f1 = path*"clock_"*"L=$L"*"Nt=1e$expo"*"_$datestamp"*".csv"
 
     touch(f1)
     acc = 0
@@ -44,8 +42,6 @@ for β in betarray
         #     elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
         #     println("Step $nt, acceptance = $acc_p %, total elapsed time $(elapsed)")#, time per step $per_step")
         # end
-    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-        println("β = $β,elapsed time $(elapsed)")#, time per step $per_step")
     E[nt] = energy(lattice, Q, L)
     m[nt] = magnetization(lattice, Q, L)
     end
@@ -56,5 +52,9 @@ for β in betarray
         m = m
     )
     CSV.write(f1, data)
+    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+    println("β = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
 end
 
+elapsed = Dates.canonicalize(Dates.round((now()-start_all), Dates.Second))
+println("FINISHED\nTotal elapsed time = $(elapsed)")
