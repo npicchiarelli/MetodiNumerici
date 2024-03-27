@@ -1,7 +1,7 @@
 using CSV, DataFrames, Dates
 include("clock.jl")
 
-L= 20
+L= 70
 Q = 4
 expo = 5
 Nt = 1*Int(10^expo)
@@ -12,9 +12,10 @@ metropolis = false
 
 @show Nupdates = Nt*L*L
 
-betarray = LinRange(0.85,0.91,21)
+betarray = round.(LinRange(0.85,0.91,41), digits = 4)
+
 start_all = now()
-for (i, β) in enumerate(betarray)
+for (i, β) in enumerate(betarray[1:10])
     pdict = init_prob_dict(Q,β)
     E = Vector{Float64}(undef, Nt)
     m = Vector{ComplexF64}(undef, Nt)
@@ -52,7 +53,7 @@ for (i, β) in enumerate(betarray)
         m = m
     )
     CSV.write(f1, data)
-    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+    local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
     println("β = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
 end
 
