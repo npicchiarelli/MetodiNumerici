@@ -97,8 +97,9 @@ function heathbath!(lattice::Array{Int}, idx::CartesianIndex, pdict::Dict, L)
     return acc
 end
 
-function JackKnife(e::Array, m::Array, blocksize::Int)
+function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
     length = size(e,1) ÷ blocksize 
+    V = L*L
 
     m_j = Vector{Float64}(undef, length) 
     e_j = Vector{Float64}(undef, length) 
@@ -119,11 +120,19 @@ function JackKnife(e::Array, m::Array, blocksize::Int)
     m_abs2_j = mean(abs2, m_b, dims = 1)
     m_abs4_j = mean(x->abs(x)^4, m_b, dims = 1)
 
-    spec_heat = e2_j.-e_j.^2 
-    susc = m_abs2_j.-m_abs_j.^2
+    spec_heat = V*(e2_j.-e_j.^2 )
+    susc = V*(m_abs2_j.-m_abs_j.^2)
     bind = m_abs4_j./(m_abs2_j.^2)
     
-    vars = [e_j; m_abs_j; m_abs2_j; spec_heat; susc; bind]
+    vars = [e_j; m_abs_j; V*m_abs2_j; spec_heat; susc; bind]
     media = mean(vars, dims = 2)
-    return media, stdm(vars, media, dims = 2).*sqrt(length)
+    return media, stdm(vars, media, dims = 2)./sqrt(length)
+end
+
+function Blocking(e::Array, blocksize::Int)
+    length = size(e,1) ÷ blocksize 
+    e_cut = e[1:length*blocksize]
+    e_b = reshape(e_cut, (blocksize, length))
+
+    return mean(e_b, dims = 1), length
 end
