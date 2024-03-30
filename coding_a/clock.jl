@@ -114,19 +114,25 @@ function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
     e_b = reshape(e_cut, (blocksize, length))
     m_b = reshape(m_cut, (blocksize, length))
 
-    e_j = mean(e_b, dims = 1)
-    e2_j = mean(x->x^2,e_b, dims = 1)
-    m_abs_j = mean(abs, m_b, dims = 1)
-    m_abs2_j = mean(abs2, m_b, dims = 1)
-    m_abs4_j = mean(x->abs(x)^4, m_b, dims = 1)
+    e_blocked = mean(e_b, dims = 1)
+    e2_blocked = mean(x->x^2,e_b, dims = 1)
+    m_abs_blocked = mean(abs, m_b, dims = 1)
+    m_abs2_blocked = mean(abs2, m_b, dims = 1)
+    m_abs4_blocked = mean(x->abs(x)^4, m_b, dims = 1)
+
+    e_j = [mean(vcat(e_blocked[1:i-1], e_blocked[i+1:end])) for i in 1:length]
+    e2_j = [mean(vcat(e2_blocked[1:i-1], e2_blocked[i+1:end])) for i in 1:length]
+    m_abs_j = [mean(vcat(m_abs_blocked[1:i-1], m_abs_blocked[i+1:end])) for i in 1:length]
+    m_abs2_j = [mean(vcat(m_abs2_blocked[1:i-1], m_abs2_blocked[i+1:end])) for i in 1:length]
+    m_abs4_j = [mean(vcat(m_abs4_blocked[1:i-1], m_abs4_blocked[i+1:end])) for i in 1:length]
 
     spec_heat = V*(e2_j.-e_j.^2 )
     susc = V*(m_abs2_j.-m_abs_j.^2)
     bind = m_abs4_j./(m_abs2_j.^2)
     
-    vars = [e_j; m_abs_j; V*m_abs2_j; spec_heat; susc; bind]
-    media = mean(vars, dims = 2)
-    return media, stdm(vars, media, dims = 2)./sqrt(length)
+    vars = [e_j m_abs_j V*m_abs2_j spec_heat susc bind]
+    media = mean(vars, dims = 1)
+    return media, stdm(vars, media, dims = 1)./sqrt(length)
 end
 
 function Blocking(e::Array, blocksize::Int)

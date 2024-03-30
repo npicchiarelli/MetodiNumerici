@@ -1,32 +1,41 @@
 using CSV, DataFrames, Dates, Plots, Statistics
 include("clock.jl")
 
-L = 40
-betarray = round.(LinRange(0.85,0.91,41), digits = 4)
-path = "..\\simulations_a\\" 
-f_w =  path*"data"*"L=$L"*".csv"
-touch(f_w)
+size_list = [20, 40, 50, 60, 70, 80]
 
-tosave = DataFrame([[],[],[],[],[],[],[],[],[],[],[],[],[],[]], ["beta", "m", "e","e_v","m_abs","m_abs_v","m_abs2","m_abs2_v","spec_heat","spec_heat_v","susc","susc_v","bind","bind_v"])
+for L in size_list
+    if L == 60
+        betarray = LinRange(0.85,0.91,41)
+    else
+        betarray =round.(LinRange(0.85,0.91,41), digits = 4)
+    end
+    path = "..\\simulations_a\\" 
+    f_w =  path*"data"*"L=$L"*".csv"
+    touch(f_w)
 
-for (i,β) in enumerate(betarray[1:end])
-    # start = now()
-    local f1 = path*"clock_Nt=1e5"*"L=$L"*"beta=$β.csv"
-    df= CSV.read(f1, DataFrame, types = [Float64, ComplexF64])
+    tosave = DataFrame([[],[],[],[],[],[],[],[],[],[],[],[],[],[]], ["beta", "m", "e","e_v","m_abs","m_abs_v","m_abs2","m_abs2_v","spec_heat","spec_heat_v","susc","susc_v","bind","bind_v"])
 
-    energ = df[!,:E]
-    magn = df[!,:m]
+    for (i,β) in enumerate(betarray[1:end])
+        # start = now()
+        local f1 = path*"clock_Nt=1e5"*"L=$L"*"beta=$β.csv"
+        df= CSV.read(f1, DataFrame, types = [Float64, ComplexF64])
 
-    start = now()
+        energ = df[!,:E]
+        magn = df[!,:m]
 
-    means, stds = JackKnife(energ,magn,750)
+        start = now()
 
-    inter = ([means stds]'[:])'
-    data = [β abs(mean(magn)) inter]
+        
+        means, stds = JackKnife(energ,magn,1500, L)
+        inter = ([means' stds']'[:])'
+        data = [β abs(mean(magn)) inter]
 
-    push!(tosave, data)
-    println("β = $β,$i/$(size(betarray,1))")
+        push!(tosave, data)
+        println("β = $β,$i/$(size(betarray,1))")
+    end
+
+
+    CSV.write(f_w, tosave)
 end
 
 
-CSV.write(f_w, tosave)
