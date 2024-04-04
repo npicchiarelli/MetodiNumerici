@@ -132,7 +132,7 @@ function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
     
     vars = [e_j m_abs_j V*m_abs2_j spec_heat susc bind]
     media = mean(vars, dims = 1)
-    return media, stdm(vars, media, dims = 1)./sqrt(length)
+    return media, stdm(vars, media, dims = 1, corrected = false).*sqrt(length-1)
 end
 
 function Blocking(e::Array, blocksize::Int)
