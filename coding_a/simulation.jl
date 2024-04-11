@@ -1,10 +1,10 @@
 using CSV, DataFrames, Dates
 include("clock.jl")
 
-L= 80
+L = 40
 Q = 4
 expo = 5
-Nt = 1*Int(10^expo)
+Nt = Int(2.5*10^expo)
 #β = 0.42
 Δ = 1
 path = "..\\simulations_a\\"
@@ -12,9 +12,10 @@ metropolis = false
 
 @show Nupdates = Nt*L*L
 
-betarray = round.(LinRange(0.85,0.91,41), digits = 4)
+
+betarray = round.(LinRange(0.86,0.88,15), digits = 4)
 start_all = now()
-for (i, β) in enumerate(betarray[34:end])
+for (i, β) in enumerate(betarray[1:end])
     pdict = init_prob_dict(Q, β)
     E = Vector{Float64}(undef, Nt)
     m = Vector{ComplexF64}(undef, Nt)
@@ -22,7 +23,7 @@ for (i, β) in enumerate(betarray[34:end])
     lattice = zeros(Int, (L,L)) 
     # datestamp=Dates.format(now(),"YYYYmmdd-HHMMSS")
 
-    f1 = path*"clock_"*"Nt=1e$expo"*"L=$L"*"beta=$β"*".csv"
+    f1 = path*"clock_"*"Nt=5e$expo"*"L=$L"*"beta=$β"*".csv"
 
     touch(f1)
     acc = 0
@@ -53,8 +54,8 @@ for (i, β) in enumerate(betarray[34:end])
     )
     CSV.write(f1, data)
     local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-    println("β = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
+    println("$(round(now(), Dates.Second));β = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
 end
 
 elapsed = Dates.canonicalize(Dates.round((now()-start_all), Dates.Second))
-println("FINISHED\nTotal elapsed time = $(elapsed)")
+println("$(round(now(), Dates.Second))\nFINISHED\nTotal elapsed time = $(elapsed)")
