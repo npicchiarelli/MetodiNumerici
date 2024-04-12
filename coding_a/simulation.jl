@@ -14,7 +14,7 @@ if isdir(path) == false
     mkpath(path)
 end
 
-size_list = [20 40 50]
+size_list = [40 50]
 for L in size_list
 
     Nupdates = Nt*L*L
@@ -44,6 +44,9 @@ for L in size_list
                 else
                     acc += heathbath!(lattice, idx, pdict, L)
                 end
+                if nt % Nt÷100 == 0
+                    print("$(int(100*nt/Nt))%...")
+                end
             end
         E[nt] = energy(lattice, Q, L)
         m[nt] = magnetization(lattice, Q, L)
@@ -57,7 +60,7 @@ for L in size_list
         CSV.write(f1, data)
         close(datafile)
         local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-        println("$(round(now(), Dates.Second));\nβ = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
+        println("$(round(now(), Dates.Second));\nβ = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)\n")
     end
 
     elapsed = Dates.canonicalize(Dates.round((now()-start_all), Dates.Second))
