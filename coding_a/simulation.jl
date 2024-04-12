@@ -1,61 +1,66 @@
 using CSV, DataFrames, Dates
 include("clock.jl")
 
-L = 40
 Q = 4
-expo = 5
-Nt = Int(2.5*10^expo)
-#β = 0.42
+mant = 1
+expo = 3
+Nt = Int(mant*10^expo)
 Δ = 1
-path = "..\\simulations_a\\"
 metropolis = false
 
-@show Nupdates = Nt*L*L
+path = joinpath(["..", "simulations_a"])
 
-
-betarray = round.(LinRange(0.86,0.88,15), digits = 4)
-start_all = now()
-for (i, β) in enumerate(betarray[1:end])
-    pdict = init_prob_dict(Q, β)
-    E = Vector{Float64}(undef, Nt)
-    m = Vector{ComplexF64}(undef, Nt)
-
-    lattice = zeros(Int, (L,L)) 
-    # datestamp=Dates.format(now(),"YYYYmmdd-HHMMSS")
-
-    f1 = path*"clock_"*"Nt=5e$expo"*"L=$L"*"beta=$β"*".csv"
-
-    touch(f1)
-    acc = 0
-    start = now()
-    for nt in 1:Nt
-        # start_step = now()
-        for idx in CartesianIndices(lattice)
-            if metropolis
-                rx = idx[1]
-                ry = idx[2]
-                acc += metropolis!(lattice,rx,ry,Δ,L,β) 
-            else
-                acc += heathbath!(lattice, idx, pdict, L)
-            end
-        end
-        # if nt%100000 == 0
-        #     elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-        #     println("Step $nt, acceptance = $acc_p %, total elapsed time $(elapsed)")#, time per step $per_step")
-        # end
-    E[nt] = energy(lattice, Q, L)
-    m[nt] = magnetization(lattice, Q, L)
-    end
-
-    datafile = open(f1)
-    data = DataFrame(
-        E = E,
-        m = m
-    )
-    CSV.write(f1, data)
-    local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-    println("$(round(now(), Dates.Second));β = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
+if isdir(path) == false
+    mkpath(path)
 end
 
-elapsed = Dates.canonicalize(Dates.round((now()-start_all), Dates.Second))
-println("$(round(now(), Dates.Second))\nFINISHED\nTotal elapsed time = $(elapsed)")
+size_list = [20 40 50]
+for L in size_list
+
+    Nupdates = Nt*L*L
+    println("You are simulating a clock model with L=$L, Nt=$Nt, total number of updates = $Nupdates.\nThe files will be saved in $path")
+
+    betarray = round.(LinRange(0.86,0.88,15), digits = 4)
+    start_all = now()
+
+    for (i, β) in enumerate(betarray[1:end])
+        pdict = init_prob_dict(Q, β)
+        E = Vector{Float64}(undef, Nt)
+        m = Vector{ComplexF64}(undef, Nt)
+
+        lattice = zeros(Int, (L,L)) 
+        fname = "clock_"*"Nt=$mant"*"e$expo"*"L=$L"*"beta=$β"*".csv"
+        f1 = joinpath([path, fname])
+
+        touch(f1)
+        acc = 0
+        start = now()
+        for nt in 1:Nt
+            # start_step = now()
+            for idx in CartesianIndices(lattice)
+                if metropolis
+                    rx = idx[1]
+                    ry = idx[2]
+                    acc += metropolis!(lattice,rx,ry,Δ,L,β) 
+                else
+                    acc += heathbath!(lattice, idx, pdict, L)
+                end
+            end
+        E[nt] = energy(lattice, Q, L)
+        m[nt] = magnetization(lattice, Q, L)
+        end
+
+        datafile = open(f1)
+        data = DataFrame(
+            E = E,
+            m = m
+        )
+        CSV.write(f1, data)
+        close(datafile)
+        local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+        println("$(round(now(), Dates.Second));\nβ = $β,$i/$(size(betarray,1)) elapsed time $(elapsed)")
+    end
+
+    elapsed = Dates.canonicalize(Dates.round((now()-start_all), Dates.Second))
+    println("$(round(now(), Dates.Second))\nFINISHED L = $L\nTotal elapsed time = $(elapsed)")
+end
