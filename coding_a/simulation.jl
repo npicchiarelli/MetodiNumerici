@@ -44,12 +44,12 @@ for L in size_list
                 else
                     acc += heathbath!(lattice, idx, pdict, L)
                 end
-                if nt % Nt÷100 == 0
-                    print("$(int(100*nt/Nt))%...")
-                end
             end
         E[nt] = energy(lattice, Q, L)
         m[nt] = magnetization(lattice, Q, L)
+        if nt % (Nt÷100) == 0
+            print("$((100*nt/Nt))%...")
+        end
         end
 
         datafile = open(f1)
