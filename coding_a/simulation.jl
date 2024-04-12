@@ -2,8 +2,8 @@ using CSV, DataFrames, Dates
 include("clock.jl")
 
 Q = 4
-mant = 1
-expo = 3
+mant = 5
+expo = 5
 Nt = Int(mant*10^expo)
 Δ = 1
 metropolis = false
@@ -36,7 +36,6 @@ for L in size_list
         acc = 0
         start = now()
         for nt in 1:Nt
-            # start_step = now()
             for idx in CartesianIndices(lattice)
                 if metropolis
                     rx = idx[1]
