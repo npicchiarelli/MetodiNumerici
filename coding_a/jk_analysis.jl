@@ -1,7 +1,7 @@
 using CSV, DataFrames, Dates, Plots, Statistics
 include("clock.jl")
 
-L = 20
+L = 60
 β = 0.85
 path = "..\\simulations_a\\" 
 
