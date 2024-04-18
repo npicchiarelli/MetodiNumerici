@@ -44,6 +44,7 @@ function main()
     L = parsed_args["L"]
     β = parsed_args["beta"]
     metropolis = parsed_args["metropolis"]
+    verbose = parsed_args["verbose"]
 
     if isdir(path) == false
         mkpath(path)
@@ -75,10 +76,10 @@ function main()
         end
     E[nt] = energy(lattice, Q, L)
     m[nt] = magnetization(lattice, Q, L)
-
-    if nt % (Nt÷100) == 0
-        print("$((100*nt/Nt))%...")
-    end
+    if verbose
+        if nt % (Nt÷100) == 0
+            print("$((100*nt/Nt))%...")
+        end
     end
     
     datafile = open(f1)
