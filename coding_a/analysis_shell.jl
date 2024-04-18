@@ -25,7 +25,7 @@ function parse_cmd()
         "path"
             help = "the path where files are stored"
             default = joinpath(["..", "simulations_a"])
-            required = true
+            required = false
             arg_type = String
     end
     return parse_args(s)
