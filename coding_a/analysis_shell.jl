@@ -43,7 +43,7 @@ function main()
     paths = filter(startswith(startp), readdir(path))
 
     fdataname = "data"*"L=$L"*"Nt=$Ntstr"*".csv"
-    f_w =joinpath([path fdataname])
+    f_w =joinpath([path, fdataname])
     touch(f_w)
     tosave = DataFrame([[],[],[],[],[],[],[],[],[],[],[],[],[],[]], ["beta", "m", "e","e_v","m_abs","m_abs_v","m_abs2","m_abs2_v","spec_heat","spec_heat_v","susc","susc_v","bind","bind_v"])
 
