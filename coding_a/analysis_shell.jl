@@ -17,11 +17,11 @@ function parse_cmd()
         "blocksize"
             help = "the number of points in a block"
             required = true
-            arg_type = int
+            arg_type = Int
         "therm"
             help = "the number of points to discard as thermalization"
             required = true
-            arg_type = int
+            arg_type = Int
         "path"
             help = "the path where files are stored"
             default = joinpath(["..", "simulations_a"])
