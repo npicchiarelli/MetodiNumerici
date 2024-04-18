@@ -26,6 +26,10 @@ function parse_cmd()
             help = "if true, metropolis algo is used instead of heathbath"
             default = false
             arg_type = Bool
+        "verbose"
+            help = "if true, percentage of execution is printed"
+            default = false
+            arg_type = Bool
     end
     return parse_args(s)
 end
@@ -71,6 +75,7 @@ function main()
         end
     E[nt] = energy(lattice, Q, L)
     m[nt] = magnetization(lattice, Q, L)
+
     if nt % (Nt÷100) == 0
         print("$((100*nt/Nt))%...")
     end
