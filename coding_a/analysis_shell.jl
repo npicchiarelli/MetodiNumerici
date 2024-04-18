@@ -6,11 +6,6 @@ function parse_cmd()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "path"
-            help = "the path where files are stored"
-            default = joinpath(["..", "simulations_a"])
-            required = true
-            arg_type = String
         "Nt"
             help = "the number of steps in the simulation"
             required = true
@@ -19,6 +14,19 @@ function parse_cmd()
             help = "the lattice dimension"
             required = true
             arg_type = Int
+        "blocksize"
+            help = "the number of points in a block"
+            required = true
+            arg_type = int
+        "therm"
+            help = "the number of points to discard as thermalization"
+            required = true
+            arg_type = int
+        "path"
+            help = "the path where files are stored"
+            default = joinpath(["..", "simulations_a"])
+            required = true
+            arg_type = String
     end
     return parse_args(s)
 end
@@ -29,6 +37,8 @@ function main()
     Nt = parsed_args["Nt"]
     Ntstr = @sprintf "%.1e" Nt
     L = parsed_args["L"]
+    blocksize = parsed_args["blocksize"]
+    therm = parsed_args["therm"]
     startp = "clock_"*"Nt="*"$Ntstr"*"L=$L"
     paths = filter(startswith(startp), readdir(path))
 
@@ -49,7 +59,7 @@ function main()
         start = now()
 
         
-        means, stds = JackKnife(energ[therm:end],magn[therm:end],100, L)
+        means, stds = JackKnife(energ[therm:end],magn[therm:end],blocksize, L)
         inter = ([means' stds']'[:])'
         data = [β abs(mean(magn)) inter]
 

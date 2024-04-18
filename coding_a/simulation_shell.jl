@@ -5,11 +5,6 @@ function parse_cmd()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "path"
-            help = "the path where files are stored"
-            default = joinpath(["..", "simulations_a"])
-            required = true
-            arg_type = String
         "Nt"
             help = "the number of steps in the simulation"
             required = true
@@ -22,6 +17,11 @@ function parse_cmd()
             help = "the reverse temperature"
             required = true
             arg_type = Float64
+        "path"
+            help = "the path where files are stored"
+            default = joinpath(["..", "simulations_a"])
+            required = false
+            arg_type = String
         "metropolis"
             help = "if true, metropolis algo is used instead of heathbath"
             default = false
