@@ -55,10 +55,6 @@ function main()
 
         energ = df[!,:E]
         magn = df[!,:m]
-
-        therm = 1
-        start = now()
-
         
         means, stds = JackKnife(energ[therm:end],magn[therm:end],blocksize, L)
         inter = ([means' stds']'[:])'
