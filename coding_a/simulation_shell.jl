@@ -90,8 +90,8 @@ function main()
         CSV.write(f1, data)
         close(datafile)
         local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-        println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
     end
+    println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
 
 main()
