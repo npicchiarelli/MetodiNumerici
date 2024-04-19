@@ -74,23 +74,24 @@ function main()
                 acc += heathbath!(lattice, idx, pdict, L)
             end
         end
-    E[nt] = energy(lattice, Q, L)
-    m[nt] = magnetization(lattice, Q, L)
-    if verbose
-        if nt % (Nt÷100) == 0
-            print("$((100*nt/Nt))%...")
+        E[nt] = energy(lattice, Q, L)
+        m[nt] = magnetization(lattice, Q, L)
+        if verbose
+            if nt % (Nt÷100) == 0
+                print("$((100*nt/Nt))%...")
+            end
         end
+        
+        datafile = open(f1)
+        data = DataFrame(
+            E = E,
+            m = m
+        )
+        CSV.write(f1, data)
+        close(datafile)
+        local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+        println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
     end
-    
-    datafile = open(f1)
-    data = DataFrame(
-        E = E,
-        m = m
-    )
-    CSV.write(f1, data)
-    close(datafile)
-    local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-    println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
 
 main()
