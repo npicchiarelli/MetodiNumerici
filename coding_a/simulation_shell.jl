@@ -17,19 +17,17 @@ function parse_cmd()
             help = "the reverse temperature"
             required = true
             arg_type = Float64
-        "path"
+        "--path", "-p"
             help = "the path where files are stored"
             default = joinpath(["..", "simulations_a"])
             required = false
             arg_type = String
-        "metropolis"
+        "--metropolis", "-m"
             help = "if true, metropolis algo is used instead of heathbath"
-            default = false
-            arg_type = Bool
-        "verbose"
-            help = "if true, percentage of execution is printed"
-            default = false
-            arg_type = Bool
+            action = :store_true
+        "--verbose", "-v"
+            help = "if given, percentage of execution is printed"
+            action = :store_true
     end
     return parse_args(s)
 end
@@ -76,21 +74,17 @@ function main()
         end
         E[nt] = energy(lattice, Q, L)
         m[nt] = magnetization(lattice, Q, L)
-        if verbose
-            if nt % (Nt÷100) == 0
-                print("$((100*nt/Nt))%...")
-            end
+
+        if nt % (Nt÷100) == 0 && verbose
+            print("$((100*nt÷Nt))%...")
         end
-        
-        datafile = open(f1)
         data = DataFrame(
             E = E,
             m = m
         )
-        CSV.write(f1, data)
-        close(datafile)
-        local elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+        CSV.write(f1, data)  
     end
+    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
     println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
 
