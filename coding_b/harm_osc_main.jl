@@ -1,4 +1,5 @@
 using ArgParse, Random
+include("harm_osc.jl")
 
 function parse_cmd()
     s = ArgParseSettings()
@@ -44,19 +45,59 @@ function main()
     η = β/Nt
     # initializing...
     lattice = zeros(Nt, Float64)
+    acc = 0.
+
+    # simulation parameters
+    orsteps = 5
+    Δ = 10.0*η
+    measevery = 1000
 
     # files management
     if !isdir(path)
         mkpath(path)
     end
-    fname = "ho_"*"$Nt"*"$sample"*"$β"
+    fname = "ho_"*"$Ntstr"*"$sample"*"$β"
     fr = joinpath([path, fname])
     if !isfile(fr)
         touch(fr)
     end
     # writing header
-    open(f1, "w") do infile
-        writedlm(file, ["x" "x2" "K" "c1" "c2" "c3" "c3c"], " ")
+    cs = permutedims(["c$(ci)_$di" for di in 1:4 for ci in 1:Nt/4])
+    open(fr, "w") do infile
+        writedlm(file, ["x" "x2" "K" cs], " ")
     end
     
+    datafile = open(fr, "a")
+    for iter in range(sample)
+        for r in 1:Nt
+            if rand() < .5
+                if metropolis
+                    acc+=metropolis!(lattice, r, Δ, η)
+                else
+                    acc+=heathbath!(lattice, r, η)
+                end
+            else
+                for _ in 1:orsteps
+                    acc+=overrelax!(lattice, r, η)
+                end
+            end
+        end
+
+        if iter%measevery == 0
+            x = calc_x(lattice, Nt)
+            x2 = calc_x2(lattice, Nt)
+            K = calc_Knaive(lattice, Nt, η)
+            corr = []
+            for δt in 0:Nt/4
+                append!(corr, correlators(lattice, δt))
+            end
+            
+            writedlm(datafile, [x x2 K corr])
+        end
+        if verbose && iter % (sample÷100) == 0
+            print("$((100*iter÷dsmple))%...")
+        end
+        close(datafile)
+    end
+
 end
