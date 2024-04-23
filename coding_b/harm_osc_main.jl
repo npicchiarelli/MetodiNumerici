@@ -67,6 +67,7 @@ function main()
         writedlm(infile, ["x" "x2" "K" cs], " ")
     end
     
+    start = now()
     datafile = open(fr, "a")
     for iter in 1:sample
         for r in LinearIndices(lattice)
@@ -99,5 +100,7 @@ function main()
     end
     print("\n")
     close(datafile)
+    elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
+    println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
 main()
