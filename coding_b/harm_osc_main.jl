@@ -1,4 +1,4 @@
-using ArgParse, Random
+using ArgParse, DelimitedFiles, Random, Printf
 include("harm_osc.jl")
 
 function parse_cmd()
@@ -41,10 +41,10 @@ function main()
     metropolis = parsed_args["metropolis"]
     verbose = parsed_args["verbose"]
     
-    Ntstr = @sprintf "%.1e" Nt
+    sstr = @sprintf "%.1e" sample
     η = β/Nt
     # initializing...
-    lattice = zeros(Nt, Float64)
+    lattice = zeros(Float64, Nt)
     acc = 0.
 
     # simulation parameters
@@ -56,20 +56,20 @@ function main()
     if !isdir(path)
         mkpath(path)
     end
-    fname = "ho_"*"$Ntstr"*"$sample"*"$β"
+    fname = "ho_"*"Nt=$Nt"*"sample=$sstr"*"beta=$β"*".txt"
     fr = joinpath([path, fname])
     if !isfile(fr)
         touch(fr)
     end
     # writing header
-    cs = permutedims(["c$(ci)_$di" for di in 1:4 for ci in 1:Nt/4])
+    cs = permutedims(["c$(Int(di))_$ci" for ci in 1:(Nt÷4)+1 for di in 1:4])
     open(fr, "w") do infile
-        writedlm(file, ["x" "x2" "K" cs], " ")
+        writedlm(infile, ["x" "x2" "K" cs], " ")
     end
     
     datafile = open(fr, "a")
-    for iter in range(sample)
-        for r in 1:Nt
+    for iter in 1:sample
+        for r in LinearIndices(lattice)
             if rand() < .5
                 if metropolis
                     acc+=metropolis!(lattice, r, Δ, η)
@@ -88,16 +88,16 @@ function main()
             x2 = calc_x2(lattice, Nt)
             K = calc_Knaive(lattice, Nt, η)
             corr = []
-            for δt in 0:Nt/4
+            for δt in 0:Nt÷4
                 append!(corr, correlators(lattice, δt))
             end
-            
-            writedlm(datafile, [x x2 K corr])
+            writedlm(datafile, [x x2 K permutedims(corr)], " ")
         end
         if verbose && iter % (sample÷100) == 0
-            print("$((100*iter÷dsmple))%...")
+            print("$((100*iter÷sample))%...")
         end
-        close(datafile)
     end
-
+    print("\n")
+    close(datafile)
 end
+main()

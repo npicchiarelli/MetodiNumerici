@@ -8,25 +8,17 @@ function calc_x2(lattice::Array{Float64}, Nt::Int)
     return sum(abs2,lattice)/Nt
 end
 
-function init_neighbors(Nt::Int)
-    idx = collect(range(1,Nt,Nt))
-    nnl = idx.-1
-    nnr = idx.+1
-    replace!(nnl, 0=>Nt)
-    replace!(nnr, Nt+1=>0)
-    return Int.(nnl), Int.(nnr)
-end
 
 function calc_Knaive(lattice::Array{Float64}, Nt::Int, eta::Float64)
     diffs = lattice .- circshift(lattice, 1)
     return sum(diffs.*diffs)/(2*Nt*eta*eta)
 end
 
-function metropolis!(lattice::Array{Float64}, r::IndexLinear, Δ::Int, β::Float64, η::Float64, nnl::Int, nnr::Int)
+function metropolis!(lattice::Array{Float64}, r::Int, Δ::Int, η::Float64)
     ΔS = Δ*(2*rand(Float64)-1)
     trial = (lattice[r]+ΔS)
-    Eold = lattice[r]*lattice[r]*(η/2.0+1.0/η)-lattice[r]*(lattice[nnl[r]]+lattice[nnr[r]])/η
-    Enew = trial*trial*(η/2.0+1.0/η)-trial*(lattice[nnl[r]]+lattice[nnr[r]])/η
+    Eold = lattice[r]*lattice[r]*(η/2.0+1.0/η)-lattice[r]*(circshift(lattice, 1)[r]+circshift(lattice, -1)[r])/η
+    Enew = trial*trial*(η/2.0+1.0/η)-trial*(circshift(lattice, 1)[r]+circshift(lattice, -1)[r])/η
 
     if Enew < Eold
         lattice[r] = trial
@@ -39,17 +31,17 @@ function metropolis!(lattice::Array{Float64}, r::IndexLinear, Δ::Int, β::Float
     return 0
 end
 
-function heathbath!(lattice::Array{Float64}, r::IndexLinear, eta::Float64, nnl::Int, nnr::Int)
+function heathbath!(lattice::Array{Float64}, r::Int, eta::Float64)
     std = 1.0/sqrt(eta + 2.0/eta)
-    avg = (lattice[nnl[r]]+lattice[nnr[r]])/(eta*(eta + 2.0/eta))
+    avg = (circshift(lattice, 1)[r]+circshift(lattice, -1)[r])/(eta*(eta + 2.0/eta))
     
     lattice[r] = avg+std*randn()
 
     return 1
 end
 
-function overrelax(lattice::Array{Float64}, r::IndexLinear, eta::Float64, nnl::Int, nnr::Int)
-    avg = (lattice[nnl[r]]+lattice[nnr[r]])/(eta*(eta + 2.0/eta))
+function overrelax!(lattice::Array{Float64}, r::Int, eta::Float64)
+    avg = (circshift(lattice, 1)[r]+circshift(lattice, -1)[r])/(eta*(eta + 2.0/eta))
     new = 2.0*avg-lattice[r]
     lattice[r] = new
 
