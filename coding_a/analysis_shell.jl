@@ -22,7 +22,7 @@ function parse_cmd()
             help = "the number of points to discard as thermalization"
             required = true
             arg_type = Int
-        "path"
+        "--path", "-p"
             help = "the path where files are stored"
             default = joinpath(["..", "simulations_a"])
             required = false
