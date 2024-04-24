@@ -75,15 +75,15 @@ function main()
         E[nt] = energy(lattice, Q, L)
         m[nt] = magnetization(lattice, Q, L)
 
-        if nt % (Nt÷100) == 0 && verbose
-            print("$((100*nt÷Nt))%...")
+        if verbose && nt % (Nt÷100) == 0
+            print("$((100*nt÷Nt))%... \r")
         end
-        data = DataFrame(
-            E = E,
-            m = m
-        )
-        CSV.write(f1, data)  
     end
+    data = DataFrame(
+        E = E,
+        m = m
+    )
+    CSV.write(f1, data)  
     elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
     println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
