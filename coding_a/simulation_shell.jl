@@ -49,7 +49,7 @@ function main()
     end
 
     Nupdates = Nt*L*L
-    @printf "You are simulating a clock model with L=%i, Nt=%.1e, total number of updates = %.2e.\nThe files will be saved in %s" L Nt Nupdates path
+    @printf "You are simulating a clock model with L=%i, Nt=%.1e, total number of updates = %.2e.\nThe files will be saved in %s \n" L Nt Nupdates path
 
     pdict = init_prob_dict(Q, β)
     E = Vector{Float64}(undef, Nt)
@@ -85,7 +85,7 @@ function main()
     )
     CSV.write(f1, data)  
     elapsed = Dates.canonicalize(Dates.round((now()-start), Dates.Second))
-    println("\nDone $(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
+    println("\n$(round(now(), Dates.Second));\nβ = $β, elapsed time $(elapsed)\n")
 end
 
 main()
