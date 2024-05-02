@@ -18,7 +18,7 @@ function getneighbors(idx::CartesianIndex, L::Int)
     return CartesianIndex.(nn_v[:,1], nn_v[:,2])
 end
 
-function energy(lattice::Array{Int}, q::Int, L::Int)
+function energy(lattice::Array{Int}, q::Int)
     e_persite = zeros(Float64, size(lattice))
     L = size(lattice, 1)
     for i in CartesianIndices(lattice)
