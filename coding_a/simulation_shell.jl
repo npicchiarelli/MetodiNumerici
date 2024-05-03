@@ -72,7 +72,7 @@ function main()
                 acc += heathbath!(lattice, idx, pdict, L)
             end
         end
-        E[nt] = energy(lattice, Q, L)
+        E[nt] = energy(lattice, Q)
         m[nt] = magnetization(lattice, Q, L)
 
         if verbose && nt % (Nt÷100) == 0
