@@ -101,13 +101,6 @@ function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
     length = size(e,1) ÷ blocksize 
     V = L*L
 
-    m_j = Vector{Float64}(undef, length) 
-    e_j = Vector{Float64}(undef, length) 
-    m_abs_j = Vector{Float64}(undef, length)
-    m_abs2_j = Vector{Float64}(undef, length)
-    m_abs4_j = Vector{Float64}(undef, length)
-    e2_j = Vector{Float64}(undef, length)
-
     e_cut = e[1:length*blocksize]
     m_cut = m[1:length*blocksize]
 
@@ -120,11 +113,13 @@ function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
     m_abs2_blocked = mean(abs2, m_b, dims = 1)
     m_abs4_blocked = mean(x->abs(x)^4, m_b, dims = 1)
 
-    e_j = [mean(vcat(e_blocked[1:i-1], e_blocked[i+1:end])) for i in 1:length]
-    e2_j = [mean(vcat(e2_blocked[1:i-1], e2_blocked[i+1:end])) for i in 1:length]
-    m_abs_j = [mean(vcat(m_abs_blocked[1:i-1], m_abs_blocked[i+1:end])) for i in 1:length]
-    m_abs2_j = [mean(vcat(m_abs2_blocked[1:i-1], m_abs2_blocked[i+1:end])) for i in 1:length]
-    m_abs4_j = [mean(vcat(m_abs4_blocked[1:i-1], m_abs4_blocked[i+1:end])) for i in 1:length]
+    jk(a) = let s = sum(a); [s-v for v in a] end
+
+    e_j = jk(e_blocked)/(length-1)
+    e2_j = jk(e2_blocked)/(length-1)
+    m_abs_j = jk(m_abs_blocked)/(length-1)
+    m_abs2_j = jk(m_abs2_blocked)/(length-1)
+    m_abs4_j = jk(m_abs4_blocked)/(length-1)
 
     spec_heat = V*(e2_j.-e_j.^2 )
     susc = V*(m_abs2_j.-m_abs_j.^2)
