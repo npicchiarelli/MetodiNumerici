@@ -115,12 +115,13 @@ function JackKnife(e::Array, m::Array, blocksize::Int, L::Int)
 
     jk(a) = let s = sum(a); [s-v for v in a] end
 
-    e_j = jk(e_blocked)/(length-1)
-    e2_j = jk(e2_blocked)/(length-1)
-    m_abs_j = jk(m_abs_blocked)/(length-1)
-    m_abs2_j = jk(m_abs2_blocked)/(length-1)
-    m_abs4_j = jk(m_abs4_blocked)/(length-1)
+    e_j = vec(jk(e_blocked)/(length-1))
+    e2_j = vec(jk(e2_blocked)/(length-1))
+    m_abs_j = vec(jk(m_abs_blocked)/(length-1))
+    m_abs2_j = vec(jk(m_abs2_blocked)/(length-1))
+    m_abs4_j = vec(jk(m_abs4_blocked)/(length-1))
 
+    
     spec_heat = V*(e2_j.-e_j.^2 )
     susc = V*(m_abs2_j.-m_abs_j.^2)
     bind = m_abs4_j./(m_abs2_j.^2)
