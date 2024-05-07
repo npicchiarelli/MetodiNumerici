@@ -56,7 +56,7 @@ function main()
     if !isdir(path)
         mkpath(path)
     end
-    fname = "ho_"*"Nt=$Nt"*"sample=$sstr"*"beta=$β"*".txt"
+    fname = "ho_sp"*"Nt=$Nt"*"sample=$sstr"*"beta=$β"*".txt"
     fr = joinpath([path, fname])
     if !isfile(fr)
         touch(fr)
