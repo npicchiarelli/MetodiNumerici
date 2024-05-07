@@ -58,7 +58,7 @@ end
 
 function Blocking(x::Array, blocksize::Int)
     length = size(x,1) ÷ blocksize 
-    x_cut = e[1:length*blocksize]
+    x_cut = x[1:length*blocksize]
     x_b = reshape(x_cut, (blocksize, length))
 
     return mean(x_b, dims = 1), length
