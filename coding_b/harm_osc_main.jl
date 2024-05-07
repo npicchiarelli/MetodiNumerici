@@ -95,7 +95,7 @@ function main()
             writedlm(datafile, [x x2 K permutedims(corr)], " ")
         end
         if verbose && iter % (sample÷100) == 0
-            print("$((100*iter÷sample))%...")
+            print("$((100*iter÷sample))% \r")
         end
     end
     print("\n")
