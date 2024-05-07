@@ -68,7 +68,6 @@ function JackKnife(x::Array, blocksize::Int)
     x_blocked = Blocking(x, blocksize)
     jk(a) = let s = sum(a); [s-v for v in a] end
     x_j = vec(jk(x_blocked)/(length-1))
-    
-    return mean(x_j), std(x_j, corrected = false).*sqrt(length-1)
+    return x_j
 end
 
