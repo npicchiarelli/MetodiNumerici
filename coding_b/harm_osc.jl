@@ -65,7 +65,7 @@ function Blocking(x::Array, blocksize::Int)
 end
 
 function JackKnife(x::Array, blocksize::Int)
-    x_blocked = Blocking(x, blocksize)
+    x_blocked, length = Blocking(x, blocksize)
     jk(a) = let s = sum(a); [s-v for v in a] end
     x_j = vec(jk(x_blocked)/(length-1))
     return x_j
