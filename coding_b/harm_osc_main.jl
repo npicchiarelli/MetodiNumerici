@@ -1,4 +1,4 @@
-using ArgParse, DelimitedFiles, Random, Printf
+using ArgParse, Dates, DelimitedFiles, Random, Printf
 include("harm_osc.jl")
 
 function parse_cmd()
