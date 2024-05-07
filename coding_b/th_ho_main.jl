@@ -41,7 +41,6 @@ function main()
     metropolis = parsed_args["metropolis"]
     verbose = parsed_args["verbose"]
     
-    sstr = @sprintf "%.1e" sample
     η = β/Nt
     # initializing...
     lattice = zeros(Float64, Nt)
@@ -56,7 +55,7 @@ function main()
     if !isdir(path)
         mkpath(path)
     end
-    fname = "ho_sp"*"Nt=$Nt"*"sample=$sstr"*"beta=$β"*".txt"
+    fname = @sprintf "ho_th_sample=%.1ebeta=%.1fNt=%2.2i.txt" sample β Nt
     fr = joinpath([path, fname])
     if !isfile(fr)
         touch(fr)
