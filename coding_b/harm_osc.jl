@@ -55,3 +55,20 @@ function correlators(lattice::Array{Float64}, δt::Int)
     corr3c = dot(map(x->x^3-1.5x, lattice), map(x->x^3-1.5x, circshift(lattice, δt)))
     return [corr1 corr2 corr3 corr3c]
 end
+
+function Blocking(x::Array, blocksize::Int)
+    length = size(x,1) ÷ blocksize 
+    x_cut = e[1:length*blocksize]
+    x_b = reshape(x_cut, (blocksize, length))
+
+    return mean(x_b, dims = 1), length
+end
+
+function JackKnife(x::Array, blocksize::Int)
+    x_blocked = Blocking(x, blocksize)
+    jk(a) = let s = sum(a); [s-v for v in a] end
+    x_j = vec(jk(x_blocked)/(length-1))
+    
+    return mean(x_j), std(x_j, corrected = false).*sqrt(length-1)
+end
+
