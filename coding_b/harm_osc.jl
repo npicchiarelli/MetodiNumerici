@@ -53,7 +53,7 @@ function correlators(lattice::Array{Float64}, δt::Int)
     corr2 = dot(lattice.^2,circshift(lattice, δt).^2)
     corr3 = dot(lattice.^3,circshift(lattice, δt).^3)
     corr3c = dot(map(x->x^3-1.5x, lattice), map(x->x^3-1.5x, circshift(lattice, δt)))
-    return [corr1 corr2 corr3 corr3c]
+    return [corr1 corr2 corr3 corr3c]./size(lattice,1)
 end
 
 function Blocking(x::Array, blocksize::Int)
