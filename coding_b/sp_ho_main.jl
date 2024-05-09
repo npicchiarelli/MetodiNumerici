@@ -55,15 +55,15 @@ function main()
     if !isdir(path)
         mkpath(path)
     end
-    fname = @sprintf "ho_th_sample=%.1ebeta=%.1fNt=%2.2i.txt" sample β Nt
+    fname = @sprintf "ho_sp_sample=%.1ebeta=%.1fNt=%2.2i.txt" sample β Nt
     fr = joinpath([path, fname])
     if !isfile(fr)
         touch(fr)
     end
     # writing header
-    cs = permutedims(["c$(Int(di))_$ci" for ci in 1:(Nt÷4)+1 for di in 1:4])
+    cs = permutedims(["c$(Int(di))_$ci" for ci in 0:(Nt÷4-1) for di in 1:4])
     open(fr, "w") do infile
-        writedlm(infile, cs, " ")
+        writedlm(infile, ["x2" cs], " ")
     end
     
     start = now()
@@ -84,11 +84,11 @@ function main()
         end
 
         if iter%measevery == 0
-            corr = []
-            for δt in 0:Nt÷4
-                append!(corr, correlators(lattice, δt))
+            toprint = [calc_x2(lattice, Nt)]
+            for δt in 0:Nt÷4-1
+                toprint = hcat(toprint, correlators(lattice, δt))
             end
-            writedlm(datafile, [permutedims(corr)], " ")
+            writedlm(datafile, toprint, " ")
         end
         if verbose && iter % (sample÷100) == 0
             print("$((100*iter÷sample))% \r")
