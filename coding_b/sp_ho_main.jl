@@ -49,7 +49,7 @@ function main()
     # simulation parameters
     orsteps = 5
     Δ = 10.0*η
-    measevery = 1000
+    measevery = 10
 
     # files management
     if !isdir(path)
