@@ -36,8 +36,8 @@ function main()
     path = parsed_args["path"]
     blocksize = parsed_args["blocksize"]
     therm = parsed_args["therm"]
-    sample = parse_args["sample"]
-    dfname = parse_args["name"]
+    sample = parsed_args["sample"]
+    # dfname = parsed_args["name"]
     startp = @sprintf "ho_sp_sample=%.1e" sample
     paths = filter(startswith(startp), readdir(path))
 
