@@ -1,5 +1,9 @@
 using CSV, DataFrames, Dates, Plots, Printf, Statistics, LsqFit, LaTeXStrings, LinearAlgebra
-default(fontfamily = "Computer Modern")
+default(fontfamily = "Computer Modern",
+background_color = :transparent,
+foreground_color = :black,
+margin=5Plots.mm
+)
 
 function fss(L, beta, y, sy, critexp)
     betac = log(1+sqrt(2))
@@ -9,8 +13,9 @@ end
 function fitmax(beta, y, sy, w::Int, plots::Bool)
     am = argmax(y)
     maxy = maximum(y)
+    betac = log(1+sqrt(2))
 
-    parabola(x, p) = p[1] .+ p[2].*(x.-beta[am]).^2
+    parabola(x, p) = p[1] .+ p[2].*(x.-betac).^2
 
     x_f = beta[am-w:am+w]
     y_f = y[am-w:am+w]
@@ -24,6 +29,7 @@ function fitmax(beta, y, sy, w::Int, plots::Bool)
     prange = (beta[am] - beta[am-1])*(w+1)
     xx = collect(LinRange(beta[am]-prange, beta[am]+prange, 5000))
     bmax = xx[argmax(parabola(xx, fit.param))]
+    berr = xx[2]-xx[1]
 
     if plots
         fp = plot(titlefontsize = 10)
@@ -31,10 +37,10 @@ function fitmax(beta, y, sy, w::Int, plots::Bool)
         ylabel!(fp, "χ")
         plot!(fp, xx, parabola(xx, fit.param), linecolor = :black)
         scatter!(fp , x_f, y_f, yerr = sy_f, markersize = 4, markercolor = :black)
-        return fit.param[1], sqrt(cov[1]), bmax, fp
+        return fit.param[1], sqrt(cov[1]), bmax, berr, fp
     end
 
-    return fit.param[1], sqrt(cov[1]), bmax
+    return fit.param[1], sqrt(cov[1]), bmax, berr
 end
 
 size_list = [40, 50, 60, 70, 80,]
@@ -46,18 +52,19 @@ betamax = []
 chimax_fit = []
 chimax_fit_v = []
 betamax_fit = []
+betamax_fit_v = []
 fitplots = []
 
 fitp = plot()
 constp = plot()
 Nt = 1000000
 Ntstr = @sprintf "%.1e" Nt
-th = plot(title = "Susceptivity vs β")
+th = plot(title = "Specific Heat vs β")
 xlabel!(th, L"β")
-ylabel!(th, L"χ")
-fssp = plot(title = "Finite Size Scaling for χ")
+ylabel!(th, L"C")
+fssp = plot(title = "Finite Size Scaling for Specific Heat")
 xlabel!(fssp, L"(β-β_c)L^{1/ν}")
-ylabel!(fssp, L"χL^{-γ/ν}")
+ylabel!(fssp, L"CL^{-α/ν}")
 
 for (i,size) in enumerate(size_list)
     f = "..\\simulations_a\\data\\dataL=$size"*"Nt=$Ntstr.csv"
@@ -65,26 +72,27 @@ for (i,size) in enumerate(size_list)
     df= CSV.read(f, DataFrame)
 
     beta = df[!,:beta]
-    y = df[!,:m]
-    sy = df[!,:m_abs_v]
+    y = df[!,:susc]
+    sy = df[!,:susc_v]
     am = argmax(y)
     maxy = maximum(y)
 
-    # fmax, maxerr, bmaxf, fitplot = fitmax(beta, y, sy, 3, true)
-    # title!(fitplot, "L=$size",)
-    # push!(fitplots, fitplot)
+    fmax, maxerr, bmaxf, berrf, fitplot = fitmax(beta, y, sy, 3, true)
+    title!(fitplot, "L=$size",)
+    push!(fitplots, fitplot)
     
-    beta_fss, chi_fss, schi_fss = fss(size, beta, y, sy, 7/4)
+    beta_fss, chi_fss, schi_fss = fss(size, beta, y, sy, 0)
 
-    # println("$size:max = $(maxy), argmax = $(am) @ beta = $(beta[am])")
-    # println("Max from fit: $fmax ± $maxerr @ $bmaxf")
-    # push!(chimax, maxy)
-    # push!(betamax,beta[am])
-    # push!(chimax_v, sy[am])
+    println("$size:max = $(maxy), argmax = $(am) @ beta = $(beta[am])")
+    println("Max from fit: $fmax ± $maxerr @ $bmaxf")
+    push!(chimax, maxy)
+    push!(betamax,beta[am])
+    push!(chimax_v, sy[am])
 
-    # push!(chimax_fit, fmax)
-    # push!(chimax_fit_v, maxerr)
-    # push!(betamax_fit, bmaxf)
+    push!(chimax_fit, fmax)
+    push!(chimax_fit_v, maxerr)
+    push!(betamax_fit, bmaxf)
+    push!(betamax_fit_v, 2berrf)
 
     color = palette(:tab10)[i]
     # plot!(th,beta,y, label = false, linecolor = color)
@@ -94,7 +102,16 @@ for (i,size) in enumerate(size_list)
     scatter!(fssp,beta_fss,chi_fss, yerr = schi_fss, label = "L = $size", markersize = 4, markercolor = color)
 end
 
-# bigplot = plot(fitplots..., layout = (5,1), size=(750, 1000), legend = false, plot_title = "Parabolic fits with 7 points near maximum")
+bigplot = plot(fitplots..., layout = (5,1), size=(750, 1000), legend = false, plot_title = "Parabolic fits with 7 points near maximum")
+
+betamodel(x,p) = p[1] .+ p[2].*x.^(-1/p[3])
+p0 = [log(1+sqrt(2)), 1., 1.]
+wt = fill(0.001, size(betamax))
+betafit = curve_fit(betamodel, size_list, betamax, wt.^(-2), p0)
+
+println(betafit.param)
+cov = estimate_covar(betafit)
+println("Errors on params: $(sqrt.(diag(cov)))")
 
 # model(x, p) = p[1].*(x.^(p[2]))
 
@@ -102,16 +119,14 @@ end
 # wt = inv.(chimax_v.^2)
 # fit = curve_fit(model, size_list, chimax, wt, p0)
 
-
 # println(fit.param)
 # cov = estimate_covar(fit)
-# println(cov)
 # println("Errors on params: $(sqrt.(diag(cov)))")
 
 # scatter!(fitp,size_list, chimax, yerr = chimax_v, label = "Sampled Max")
 # xx = collect(LinRange(0,80,1000))
 # plot!(fitp, xx, model(xx, fit.param), label = "Best Fit")
-# title!(fitp, L"Fit on $\chi_{max}$ to determine critical exponent")
+# title!(fitp, "Critical exponent fit, Sampled Max")
 # ylabel!(fitp, L"χ_{max}")
 # xlabel!(fitp, L"L")
 
@@ -127,10 +142,9 @@ end
 # println(covf)
 # println("Errors on params: $(sqrt.(diag(covf)))")
 
-# fitpf = plot()
+# fitpf = plot(title = "Critical exponent fit, Fit Max")
 # scatter!(fitpf,size_list, chimax_fit, yerr = chimax_fit_v, label = "Max from Fit")
 # plot!(fitpf, xx, model(xx, fitf.param), label = "Best Fit")
-# title!(fitpf, L"Fit on $\chi_{max}$ to determine critical exponent, Fit")
 # ylabel!(fitpf, L"χ_{max}")
 # xlabel!(fitpf, L"L")
 
@@ -147,8 +161,8 @@ end
 # ylabel!(crit, "γ")
 
 # display(bigplot)
-display(th)
-display(fssp)
+# display(th)
+# display(fssp)
 
 # display(constp)
 # display(fitp)
@@ -157,6 +171,13 @@ display(fssp)
 # display(fitpf)
 # display(crit)
 
-# # savefig(th, "th.png")
-# # savefig(constp, "constp.png")
-# # savefig(fitp, "fitp.png")
+# savefig(bigplot, "..\\imgs_a\\bigplot.png")
+# savefig(th, "..\\imgs_a\\spec.png")
+# savefig(fssp, "..\\imgs_a\\spec_fss.png")
+
+# savefig(constp, "..\\imgs_a\\constp.png")
+# savefig(fitp, "..\\imgs_a\\fitp.png")
+
+# savefig(constpf, "..\\imgs_a\\constpf.png")
+# savefig(fitpf, "..\\imgs_a\\fitpf.png")
+# savefig(crit, "..\\imgs_a\\crit.png")
