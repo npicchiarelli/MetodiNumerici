@@ -94,3 +94,5 @@ function main()
         CSV.write(joinpath([path, "data", f1]), data) 
     end
 end
+
+main()
