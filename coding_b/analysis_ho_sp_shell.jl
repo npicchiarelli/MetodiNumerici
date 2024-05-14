@@ -92,6 +92,7 @@ function main()
         f1 = @sprintf "data_sample%.1eNt%ibeta%.1f.csv" sample Nt β
         touch(joinpath([path, "data", f1]))
         CSV.write(joinpath([path, "data", f1]), data) 
+        println("Nt=$Nt")
     end
 end
 
