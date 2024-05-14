@@ -41,6 +41,8 @@ function main()
     metropolis = parsed_args["metropolis"]
     verbose = parsed_args["verbose"]
     
+    println(@sprintf "Starting simulation: sample=%.1e Nt=%.i β=%.1f" sample Nt β)
+
     η = β/Nt
     # initializing...
     lattice = zeros(Float64, Nt)
