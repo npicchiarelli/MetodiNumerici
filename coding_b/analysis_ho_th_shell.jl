@@ -36,8 +36,8 @@ function main()
     path = parsed_args["path"]
     blocksize = parsed_args["blocksize"]
     therm = parsed_args["therm"]
-    sample = parse_args["sample"]
-    dfname = parse_args["name"]
+    sample = parsed_args["sample"]
+    dfname = parsed_args["name"]
     startp = @sprintf "ho_th_sample=%.1e" sample
     paths = filter(startswith(startp), readdir(path))
     size_list = []
@@ -79,8 +79,10 @@ function main()
     end
 
     w = open(joinpath([path, dfname]), "w") do io
-        writedlm(io, ["size_list" "eta_list" "x" "xv" "x2" "x2v" "K" "Kv" "H" "Hv"], " ")
-        writedlm(io, [size_list eta_list x xv x2 x2v K Kv H Hv], " ")
+        writedlm(io, ["size_list" "eta_list" "x" "xv" "x2" "x2v" "K" "Kv" "H" "Hv"], ",")
+        writedlm(io, [size_list eta_list x xv x2 x2v K Kv H Hv], ",")
     end
+    println("Done! Data stored in $(joinpath([path, dfname]))")
 end
 
+main()
