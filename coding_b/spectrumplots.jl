@@ -23,7 +23,7 @@ scatter!(p, df[!,:sp],df[!,:x4], yerr = df[!,:x4v], markershape=:plus, label = L
 xlabel!("Spacing")
 ylabel!("Correlators")
 ylims!(0.9, 4)
-annotate!(p, 2.8, 3.35, text(L"Where $A = x^3-\frac{3}{2}x$", :black,:left, 8))
+annotate!(p, 2.8, 3.33, text(L"Where $A = x^3-\frac{3}{2}x$", :black,:left, 8))
 title!("Plot of Correlators vs Spacing")
 
 display(p)
