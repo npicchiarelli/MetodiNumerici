@@ -1,6 +1,6 @@
 using CSV, DataFrames,LaTeXStrings, Plots, Printf, Statistics
 default(fontfamily = "Computer Modern",
-background_color = :white,
+background_color = :transparent,
 foreground_color = :black,
 margin=5Plots.mm
 )
@@ -31,7 +31,7 @@ xticks!(p, collect(0:1000:10000))
 title!("Standard Deviation of JackKnife Energy as a Function of Block Size")
 xlabel!("Block Size [samples]")
 ylabel!(L"σ_{Energy}")
-plot!(p,[5000, 5000], [0.05, 0.35], lw=2, lc=:black, ls =:dash, label = false)
+plot!(p,[5000, 5000], [0.05, 0.38], lw=2, lc=:black, ls =:dash, label = false)
 
 for (L,β) in [(40,0.8650) (80, 0.8750)]
     Nt = 1000000
@@ -54,5 +54,5 @@ for (L,β) in [(40,0.8650) (80, 0.8750)]
     plot!(p,blocksize_v, v, lw = 1.5, label =@sprintf "L=%i beta=%.3f" L β)
 end
 
-
+savefig(p, "..\\imgs_a\\jk.png")
 display(p)

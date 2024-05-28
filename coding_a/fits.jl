@@ -14,6 +14,7 @@ function fitmax(beta, y, sy, w::Int, plots::Bool)
     am = argmax(y)
     maxy = maximum(y)
     betac = log(1+sqrt(2))
+    betac = beta[am]
 
     parabola(x, p) = p[1] .+ p[2].*(x.-betac).^2
 
@@ -56,7 +57,7 @@ betamax_fit_v = []
 fitplots = []
 
 fitp = plot()
-constp = plot()
+constp = plot(legend = false)
 Nt = 1000000
 Ntstr = @sprintf "%.1e" Nt
 th = plot(title = "Specific Heat vs β")
@@ -109,65 +110,67 @@ p0 = [log(1+sqrt(2)), 1., 1.]
 wt = fill(0.001, size(betamax))
 betafit = curve_fit(betamodel, size_list, betamax, wt.^(-2), p0)
 
+println("Beta")
 println(betafit.param)
 cov = estimate_covar(betafit)
 println("Errors on params: $(sqrt.(diag(cov)))")
 
-# model(x, p) = p[1].*(x.^(p[2]))
+model(x, p) = p[1].*(x.^(p[2]))
 
-# p0 = [1., 7/4]
-# wt = inv.(chimax_v.^2)
-# fit = curve_fit(model, size_list, chimax, wt, p0)
+p0 = [1., 7/4]
+wt = inv.(chimax_v.^2)
+fit = curve_fit(model, size_list, chimax, wt, p0)
 
-# println(fit.param)
-# cov = estimate_covar(fit)
-# println("Errors on params: $(sqrt.(diag(cov)))")
+println("Fit d'Elia")
+println(fit.param)
+cov = estimate_covar(fit)
+println("Errors on params: $(sqrt.(diag(cov)))")
 
-# scatter!(fitp,size_list, chimax, yerr = chimax_v, label = "Sampled Max")
-# xx = collect(LinRange(0,80,1000))
-# plot!(fitp, xx, model(xx, fit.param), label = "Best Fit")
-# title!(fitp, "Critical exponent fit, Sampled Max")
-# ylabel!(fitp, L"χ_{max}")
-# xlabel!(fitp, L"L")
+scatter!(fitp,size_list, chimax, yerr = chimax_v, label = "Sampled Max")
+xx = collect(LinRange(0,80,1000))
+plot!(fitp, xx, model(xx, fit.param), label = "Best Fit")
+title!(fitp, "Critical exponent fit, Sampled Max")
+ylabel!(fitp, L"χ_{max}")
+xlabel!(fitp, L"L")
 
-# scatter!(constp, size_list, chimax.*size_list.^(-7/4), yerr = chimax_v.*size_list.^(-7/4))
-# title!(constp, "Finite Size Scaling for Susceptivity Peak")
-# xlabel!(constp, L"L")
-# ylabel!(constp, L"χ_{max}*L^{-γ/ν}")
+scatter!(constp, size_list, chimax.*size_list.^(-7/4), yerr = chimax_v.*size_list.^(-7/4))
+title!(constp, "Finite Size Scaling for Susceptivity Peak")
+xlabel!(constp, L"L")
+ylabel!(constp, L"χ_{max}L^{-γ/ν}")
 
-# fitf = curve_fit(model, size_list, chimax, chimax_fit_v.^(-2), p0)
+fitf = curve_fit(model, size_list, chimax, chimax_fit_v.^(-2), p0)
+println("Fit Bonati")
+println(fitf.param)
+covf = estimate_covar(fitf)
+println(covf)
+println("Errors on params: $(sqrt.(diag(covf)))")
 
-# println(fitf.param)
-# covf = estimate_covar(fitf)
-# println(covf)
-# println("Errors on params: $(sqrt.(diag(covf)))")
+fitpf = plot(title = "Critical exponent fit, Fit Max")
+scatter!(fitpf,size_list, chimax_fit, yerr = chimax_fit_v, label = "Max from Fit")
+plot!(fitpf, xx, model(xx, fitf.param), label = "Best Fit")
+ylabel!(fitpf, L"χ_{max}")
+xlabel!(fitpf, L"L")
 
-# fitpf = plot(title = "Critical exponent fit, Fit Max")
-# scatter!(fitpf,size_list, chimax_fit, yerr = chimax_fit_v, label = "Max from Fit")
-# plot!(fitpf, xx, model(xx, fitf.param), label = "Best Fit")
-# ylabel!(fitpf, L"χ_{max}")
-# xlabel!(fitpf, L"L")
+constpf = plot(legend = false)
+scatter!(constpf, size_list, chimax_fit.*size_list.^(-7/4), yerr = chimax_fit_v.*size_list.^(-7/4))
+title!(constpf, "Finite Size Scaling for Susceptivity Peak, Fit")
+xlabel!(constpf, L"L")
+ylabel!(constpf, L"χ_{max}L^{-γ/ν}")
 
-# constpf = plot()
-# scatter!(constpf, size_list, chimax_fit.*size_list.^(-7/4), yerr = chimax_fit_v.*size_list.^(-7/4))
-# title!(constpf, "Finite Size Scaling for Susceptivity Peak, Fit")
-# xlabel!(constpf, L"L")
-# ylabel!(constpf, L"χ_{max}*L^{-γ/ν}")
-
-# crit = plot(title = "Comparison between maximum methods, γ")
-# scatter!(crit, [1,2], [fit.param[2], fitf.param[2]], yerr = sqrt.([cov[4], covf[4]]), ms = 5, markershape=:square, markercolor=:black, label = false)
-# plot!(crit, [0.5, 2.5], [7/4, 7/4], lw=2, lc=:black, ls =:dash, label = "Theory") 
-# xticks!(crit, [1,2], ["Simple Max", "Fit Max"])
-# ylabel!(crit, "γ")
+crit = plot(title = "Comparison between maximum methods, γ")
+scatter!(crit, [1,2], [fit.param[2], fitf.param[2]], yerr = sqrt.([cov[4], covf[4]]), ms = 5, markershape=:square, markercolor=:black, label = false)
+plot!(crit, [0.5, 2.5], [7/4, 7/4], lw=2, lc=:black, ls =:dash, label = "Theory") 
+xticks!(crit, [1,2], ["Simple Max", "Fit Max"])
+ylabel!(crit, "γ")
 
 # display(bigplot)
 # display(th)
 # display(fssp)
 
-# display(constp)
+display(constp)
 # display(fitp)
 
-# display(constpf)
+display(constpf)
 # display(fitpf)
 # display(crit)
 
@@ -175,9 +178,9 @@ println("Errors on params: $(sqrt.(diag(cov)))")
 # savefig(th, "..\\imgs_a\\spec.png")
 # savefig(fssp, "..\\imgs_a\\spec_fss.png")
 
-# savefig(constp, "..\\imgs_a\\constp.png")
+savefig(constp, "..\\imgs_a\\constp.png")
 # savefig(fitp, "..\\imgs_a\\fitp.png")
 
-# savefig(constpf, "..\\imgs_a\\constpf.png")
+savefig(constpf, "..\\imgs_a\\constpf.png")
 # savefig(fitpf, "..\\imgs_a\\fitpf.png")
 # savefig(crit, "..\\imgs_a\\crit.png")
