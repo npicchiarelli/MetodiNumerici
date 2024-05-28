@@ -4,7 +4,7 @@ include("harm_osc.jl")
 default(fontfamily = "Computer Modern",
 background_color = :white,
 foreground_color = :black,
-# background_color_legend = nothing,
+background_color_legend = nothing,
 margin=5Plots.mm
 )
 
@@ -24,5 +24,6 @@ xlabel!("Spacing")
 ylabel!("Correlators")
 ylims!(0.9, 4)
 annotate!(p, 2.8, 3.35, text(L"Where $A = x^3-\frac{3}{2}x$", :black,:left, 8))
+title!("Plot of Correlators vs Spacing")
 
 display(p)
