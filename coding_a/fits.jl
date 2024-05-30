@@ -121,7 +121,6 @@ p0 = [1., 7/4]
 wt = inv.(chimax_v.^2)
 fit = curve_fit(model, size_list, chimax, wt, p0)
 
-println("Fit d'Elia")
 println(fit.param)
 cov = estimate_covar(fit)
 println("Errors on params: $(sqrt.(diag(cov)))")
@@ -139,7 +138,6 @@ xlabel!(constp, L"L")
 ylabel!(constp, L"χ_{max}L^{-γ/ν}")
 
 fitf = curve_fit(model, size_list, chimax, chimax_fit_v.^(-2), p0)
-println("Fit Bonati")
 println(fitf.param)
 covf = estimate_covar(fitf)
 println(covf)
@@ -178,9 +176,9 @@ display(constpf)
 # savefig(th, "..\\imgs_a\\spec.png")
 # savefig(fssp, "..\\imgs_a\\spec_fss.png")
 
-savefig(constp, "..\\imgs_a\\constp.png")
+# savefig(constp, "..\\imgs_a\\constp.png")
 # savefig(fitp, "..\\imgs_a\\fitp.png")
 
-savefig(constpf, "..\\imgs_a\\constpf.png")
+# savefig(constpf, "..\\imgs_a\\constpf.png")
 # savefig(fitpf, "..\\imgs_a\\fitpf.png")
 # savefig(crit, "..\\imgs_a\\crit.png")
