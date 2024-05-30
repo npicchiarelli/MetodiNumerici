@@ -1,8 +1,8 @@
-using CSV, DataFrames, DelimitedFiles, Plots, Printf, Statistics
+using CSV, DataFrames, DelimitedFiles, LaTeXStrings, Plots, Printf, Statistics
 include("harm_osc.jl")
 
 default(fontfamily = "Computer Modern",
-background_color = :white,
+background_color = :transparent,
 foreground_color = :black,
 background_color_legend = nothing,
 margin=5Plots.mm
@@ -14,16 +14,17 @@ fname = @sprintf "data_sample%.1eNt%ibeta%.1f.csv" sample Nt β
 
 df= CSV.read(joinpath([path, fname]), DataFrame)
 
-p = plot(legend=:best)
+p = plot(legend=:best, dpi=600)
 
 scatter!(p, df[!,:sp],df[!,:x], yerr = df[!,:xv], markershape=:plus, label = L"x-x")
 scatter!(p, df[!,:sp],df[!,:x2], yerr = df[!,:x2v], markershape=:plus, label = L"x^2-x^2")
 scatter!(p, df[!,:sp],df[!,:x3], yerr = df[!,:x3v], markershape=:plus, label = L"x^3-x^3")
 scatter!(p, df[!,:sp],df[!,:x4], yerr = df[!,:x4v], markershape=:plus, label = L"A-A")
 xlabel!("Spacing")
-ylabel!("Correlators")
+ylabel!(L"\Delta E/(\hbar \omega)")
 ylims!(0.9, 4)
 annotate!(p, 2.8, 3.33, text(L"Where $A = x^3-\frac{3}{2}x$", :black,:left, 8))
-title!("Plot of Correlators vs Spacing")
+title!("Plot of Energy Gaps vs Correlators Spacing")
 
 display(p)
+# savefig(p, "..\\imgs_b\\gaps.png")
