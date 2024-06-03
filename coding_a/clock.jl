@@ -56,10 +56,10 @@ function init_prob_dict(q::Int, β::Float64)
     end
     
     for i in 1:length(prob_v)
-        norm_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])
+        cum_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])
     end
 
-    return Dict(zip(comb_arr, norm_prob))
+    return Dict(zip(comb_arr, cum_prob))
 end
 
 function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int, β::Float64)
