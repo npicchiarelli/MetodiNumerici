@@ -13,8 +13,8 @@ end
 function fitmax(beta, y, sy, w::Int, plots::Bool)
     am = argmax(y)
     maxy = maximum(y)
-    betac = log(1+sqrt(2))
-    betac = beta[am]
+    betac = log(1+sqrt(2)) #forzando dul valore di beta critico noto
+    betac = beta[am] #forzando sul punoto di massimo
 
     parabola(x, p) = p[1] .+ p[2].*(x.-betac).^2
 
@@ -30,7 +30,7 @@ function fitmax(beta, y, sy, w::Int, plots::Bool)
     prange = (beta[am] - beta[am-1])*(w+1)
     xx = collect(LinRange(beta[am]-prange, beta[am]+prange, 5000))
     bmax = xx[argmax(parabola(xx, fit.param))]
-    berr = xx[2]-xx[1]
+    berr = xx[2]-xx[1] #si prende come errore la spaziatura
 
     if plots
         fp = plot(titlefontsize = 10)
@@ -137,7 +137,7 @@ title!(constp, "Finite Size Scaling for Susceptivity Peak")
 xlabel!(constp, L"L")
 ylabel!(constp, L"χ_{max}L^{-γ/ν}")
 
-fitf = curve_fit(model, size_list, chimax, chimax_fit_v.^(-2), p0)
+fitf = curve_fit(model, size_list, chimax_fit, chimax_fit_v.^(-2), p0)
 println(fitf.param)
 covf = estimate_covar(fitf)
 println(covf)

@@ -12,10 +12,10 @@ end
 
 function getneighbors(idx::CartesianIndex, L::Int)
     lrud = [[0 1]; [0 -1]; [1 0]; [-1 0]] 
-    i_v = hcat(getindex(idx,1), getindex(idx,2))
-    nn_v = i_v .+ lrud
-    replace!(nn_v, 0=>L, L+1=>1)
-    return CartesianIndex.(nn_v[:,1], nn_v[:,2])
+    i_v = hcat(getindex(idx,1), getindex(idx,2)) #matrice 1x2 con riga e colonna di idx
+    nn_v = i_v .+ lrud # matrice 4x2 con riga e colonna del nearest neighbor di idx in ogni direzione
+    replace!(nn_v, 0=>L, L+1=>1)#impongo le condizioni al bordo periodiche
+    return CartesianIndex.(nn_v[:,1], nn_v[:,2])#ho un array con gli indici cartesiani dei nearest neig. di idx
 end
 
 function energy(lattice::Array{Int}, q::Int)
@@ -44,22 +44,24 @@ end
 
 function init_prob_dict(q::Int, β::Float64)
     a = 0:q-1
-    comb_arr = collect(with_replacement_combinations(a,4))
-    e_v = Vector{Vector{Float64}}(undef, 35)
+    comb_arr = collect(with_replacement_combinations(a,4))#array con tutte le possibili combinazioni con ripetizione di q elementi e lunghezza 4
+    e_v = Vector{Vector{Float64}}(undef, 35)#vettore di vettori di lunghezza bohx35 (35 è il numero di combinazioni)
     prob_v = Vector{Vector{Float64}}(undef, 35)
     norm_prob = Vector{Vector{Float64}}(undef, 35)
 
-    for (idx, i) in enumerate(comb_arr)
-        e_v[idx] = round.([-sum(cos, (2pi/q).*(j .- i)) for j in a])
-        prob_v[idx] = exp.(-β* e_v[idx])./sum(exp.(-β.*e_v[idx]))
+    for (idx, i) in enumerate(comb_arr)#i è l'elemento di comb_arr idx l'indice di comb_arr
+        e_v[idx] = round.([-sum(cos, (2pi/q).*(j .- i)) for j in a])#= all'elemento e[idx] associo un array con il valore dell'energia per ogni 
+        valore di j (valora centrale)
+        =#
+        prob_v[idx] = exp.(-β* e_v[idx])./sum(exp.(-β.*e_v[idx]))#calcolo probabilità associata
         # @show i, e_v[idx]
     end
     
     for i in 1:length(prob_v)
-        cum_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])
+        cum_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])#calcola la somma delle probabilità per tutti i vlaori di j a combinazione fissata
     end
 
-    return Dict(zip(comb_arr, cum_prob))
+    return Dict(zip(comb_arr, cum_prob))#associo alla probabilità cumulativa la combinazione di nnb corrispondente
 end
 
 function metropolis!(lattice::Array{Int}, rx::Int, ry::Int, Δ::Int, q::Int, β::Float64)
