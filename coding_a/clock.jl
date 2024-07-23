@@ -51,15 +51,14 @@ function init_prob_dict(q::Int, β::Float64)
 
     for (idx, i) in enumerate(comb_arr)#i è l'elemento di comb_arr idx l'indice di comb_arr
         e_v[idx] = round.([-sum(cos, (2pi/q).*(j .- i)) for j in a])#= all'elemento e[idx] associo un array con il valore dell'energia per ogni 
-        valore di j (valora centrale)
+        valore di j (valore centrale) è un array con j valori 
         =#
-        prob_v[idx] = exp.(-β* e_v[idx])./sum(exp.(-β.*e_v[idx]))#calcolo probabilità associata
+        prob_v[idx] = exp.(-β* e_v[idx])./sum(exp.(-β.*e_v[idx]))#calcolo probabilità associata ad ogni valore di j
         # @show i, e_v[idx]
     end
     
     for i in 1:length(prob_v)
-        cum_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])#calcola la somma delle probabilità per tutti i vlaori di j a combinazione fissata
-    end
+        cum_prob[i] = ([sum(prob_v[i][1:j]) for j in 1:4])#calcola la somma delle probabilità da 0 a i e ho un array con 4 elementi
 
     return Dict(zip(comb_arr, cum_prob))#associo alla probabilità cumulativa la combinazione di nnb corrispondente
 end
@@ -90,7 +89,7 @@ function heathbath!(lattice::Array{Int}, idx::CartesianIndex, pdict::Dict, L)
     rnumber = rand()
     rnumber
     for (i,p) in enumerate(prob)
-        if rnumber<p
+        if rnumber<p # se r è sotto al primo elemento metto 0, se è sotto il secondo metto 1 e così via
             lattice[idx] = i-1
             acc+=1
             break
